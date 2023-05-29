@@ -15,13 +15,21 @@ Vector2d System::equation(int i, bool flag) {
 Vector2d System::irrEquation(int i, bool flag) {
     Vector2d res (0, 0);
     const vector<int> offsets = {i - 1, i, i + 1};
+    // for (int l = 0; l < 3; ++l) {
+    //     int k = l;
+    //     if (flag) {
+    //         k = 2 - l;
+    //     }
+    //     int new_i = offsets[k];
+    //     res += gamma_matrices[i][k] * u[new_i];
+    // }
     for (int l = 0; l < 3; ++l) {
-        int k = l;
         if (flag) {
-            k = 2 - l;
+            res += gamma_plus[l] * u[offsets[2 - l]];
         }
-        int new_i = offsets[k];
-        res += gamma_matrices[i][k] * u[new_i];
+        else {
+            res += gamma_minus[l] * u[offsets[l]];
+        }
     }
     return u[i] + (tau / h) * res; 
 }
@@ -33,7 +41,7 @@ void System::solve(double t) {
     for (int i = 1; i < Mx - 1; ++i) {
         if (i == J) {
             new_u[i] = irrEquation(i, false);
-            new_u[i + 1] = irrEquation(i, true);
+            new_u[i + 1] = irrEquation(i + 1, true);
             i = i + 1;
         }
         else {
@@ -43,6 +51,10 @@ void System::solve(double t) {
             else {
                 new_u[i] = equation(i, false);
             }
+        }
+        if (abs(new_u[i](1) - u[i](1)) > 0.055) {
+            std::cout << "Lol : " << i << std::endl;
+            std::cout << "J : " << J << std::endl;
         }
     }
     u = new_u;
