@@ -18,7 +18,7 @@ void InitValues::PrintInit() {
     file.close();
 }
 double InitValues::foo(double x) {
-    if (abs(x) <= 1 / omega) return 0.5 * (1 - cos(2 * M_PI * x * omega));
+    if (x <= omega && x >= 0.0) return 0.5 * (1 - cos(2 * M_PI * x / omega));
     return 0.0;
 }
 Vector2d InitValues::GetExactSol(int i, double x0, double omega, double t) {

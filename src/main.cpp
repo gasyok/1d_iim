@@ -13,7 +13,7 @@ int main() {
     int Mx = 200;
     double x0 = 0;
     double A = 1;
-    double omega = 5;
+    double omega = 0.2;
     System mesh(cir_left, Mx, x0, A, omega);
     mesh.sample();
 
