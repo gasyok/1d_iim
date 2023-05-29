@@ -27,24 +27,24 @@ Vector2d System::irrEquation(int i, bool flag) {
 }
 void System::solve(double t) {
     vector<Vector2d> new_u = u;
-    // for (int i = 1; i < Mx - 1; ++i) {
-    //     new_u[i] = GetExactSol(i, x0, omega, t);
-    // }
     for (int i = 1; i < Mx - 1; ++i) {
-        if (i == J) {
-            new_u[i] = irrEquation(i, false);
-            new_u[i + 1] = irrEquation(i, true);
-            i = i + 1;
-        }
-        else {
-            if (i > J + 1) {
-                new_u[i] = equation(i, true);
-            }
-            else {
-                new_u[i] = equation(i, false);
-            }
-        }
+        new_u[i] = GetExactSol(i, x0, omega, t);
     }
+    // for (int i = 1; i < Mx - 1; ++i) {
+    //     if (i == J) {
+    //         new_u[i] = irrEquation(i, false);
+    //         new_u[i + 1] = irrEquation(i, true);
+    //         i = i + 1;
+    //     }
+    //     else {
+    //         if (i > J + 1) {
+    //             new_u[i] = equation(i, true);
+    //         }
+    //         else {
+    //             new_u[i] = equation(i, false);
+    //         }
+    //     }
+    // }
     u = new_u;
 }
 void System::sample() {

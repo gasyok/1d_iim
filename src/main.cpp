@@ -10,7 +10,7 @@ int main() {
     // double tau = 0.0004;
     double cir_left = 0.6;
     int N = 1000;
-    int Mx = 100;
+    int Mx = 200;
     double x0 = 0;
     double A = 1;
     double omega = 5;
