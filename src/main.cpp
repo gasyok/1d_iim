@@ -8,9 +8,8 @@ using std::ofstream;
 int main() {
     // CIR_left, Mx, x0, A, omega
     // double tau = 0.0004;
-    double cir_left = 0.6;
-    int N = 1000;
-    int Mx = 200;
+    double cir_left = 0.4;
+    int Mx = 500;
     double x0 = 0;
     double A = 1;
     double omega = 0.2;

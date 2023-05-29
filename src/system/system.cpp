@@ -27,24 +27,24 @@ Vector2d System::irrEquation(int i, bool flag) {
 }
 void System::solve(double t) {
     vector<Vector2d> new_u = u;
-    for (int i = 1; i < Mx - 1; ++i) {
-        new_u[i] = GetExactSol(i, x0, omega, t);
-    }
     // for (int i = 1; i < Mx - 1; ++i) {
-    //     if (i == J) {
-    //         new_u[i] = irrEquation(i, false);
-    //         new_u[i + 1] = irrEquation(i, true);
-    //         i = i + 1;
-    //     }
-    //     else {
-    //         if (i > J + 1) {
-    //             new_u[i] = equation(i, true);
-    //         }
-    //         else {
-    //             new_u[i] = equation(i, false);
-    //         }
-    //     }
+    //     new_u[i] = GetExactSol(i, x0, omega, t);
     // }
+    for (int i = 1; i < Mx - 1; ++i) {
+        if (i == J) {
+            new_u[i] = irrEquation(i, false);
+            new_u[i + 1] = irrEquation(i, true);
+            i = i + 1;
+        }
+        else {
+            if (i > J + 1) {
+                new_u[i] = equation(i, true);
+            }
+            else {
+                new_u[i] = equation(i, false);
+            }
+        }
+    }
     u = new_u;
 }
 void System::sample() {
@@ -52,17 +52,26 @@ void System::sample() {
     while (n < total_steps) {
         solve(n * tau);
         std::ostringstream filename;
+        std::ostringstream exact;
         filename << "../bin/animation/velocity_out_" << std::setfill('0') << std::setw(5) << n << ".bin";
+        exact << "../bin/animation/exact_out_" << std::setfill('0') << std::setw(5) << n << ".bin";
+
         std::ofstream file_velocity(filename.str(), std::ios::binary);
+        std::ofstream file_exact(exact.str(), std::ios::binary);
         // Запись количества точек данных для текущего временного шага (4 байта, little-endian)
         for (int i = 0; i < Mx; ++i) {
             float x_coord = h * i;
             float pressure_value = GetValue(i)(1);
+            float exact_pressure = GetExactSol(i, x0, omega, n * tau)(1);
             // Запись x, y и p(x, y) (каждый параметр - 4 байта, little-endian)
             file_velocity.write(reinterpret_cast<char*>(&x_coord), sizeof(x_coord));
             file_velocity.write(reinterpret_cast<char*>(&pressure_value), sizeof(pressure_value));
+
+            file_exact.write(reinterpret_cast<char*>(&x_coord), sizeof(x_coord));
+            file_exact.write(reinterpret_cast<char*>(&exact_pressure), sizeof(exact_pressure));
         }
         file_velocity.close();
+        file_exact.close();
         n++;
     }
     std::cout << "Compute ready!\n";

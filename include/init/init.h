@@ -14,7 +14,7 @@ private:
 public:
     double A, omega, x0, y0;
     vector<Vector2d> u;
-    double foo(double x);
+    double foo(double x, bool flag);
     Matrix2d A_minus, A_plus;
     double rho_minus, rho_plus, c_minus, c_plus, k_minus, k_plus;
     double tau, h, alpha;
