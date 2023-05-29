@@ -11,5 +11,5 @@ private:
     void Solve();
 public:
     std::unordered_map<int, std::vector<Eigen::Matrix2d>> gamma_matrices;
-    PreProcess(double _tau, double _h, int _M, double _x0, double _A, double _omega);
+    PreProcess(double _tau, int _M, double _x0, double _A, double _omega);
 };
