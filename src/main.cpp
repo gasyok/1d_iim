@@ -9,28 +9,33 @@ int main() {
     // CIR_left, Mx, x0, A, omega
     // double tau = 0.0004;
     double cir_left = 0.4;
-    int Mx = 500;
-    double x0 = 0;
+    int Mx = 150;
+    double x0 = 0.1;
     double A = 1;
-    double omega = 0.2;
-    System mesh(cir_left, Mx, x0, A, omega);
-    mesh.sample();
+    double omega = 0.17;
+    // System mesh(cir_left, Mx, x0, A, omega);
+    // mesh.sample();
+    ofstream file;
+    file.open("../bin/result.data");
+    double prev_l1 = 0, prev_linf = 0, l1 = 0, linf = 0;
+    for (int k = 0; k < 5; ++k) {
+        System mesh(cir_left, Mx, x0, A, omega);
+        mesh.sample();
+        l1 = mesh.l_1();
+        linf = mesh.l_inf();
+        double p1 = 0, pinf = 0;
+        if (k > 0) {
+            p1 = (log(l1) - log(prev_l1)) / log(0.5);
+            pinf = (log(linf) - log(prev_linf)) / log(0.5);
+        }
+        // double h = mesh.h;
+        file << Mx << "    " << l1 << "    " << p1 << "    " << linf << "    " << pinf << std::endl;
+        prev_l1 = l1;
+        prev_linf = linf;
+        Mx *= 2;
+    }
 
-    // for (int n = 0; n < N; ++n) {
-    //     mesh.solve(n * mesh.tau);
-    //     // Формирование имени файла с индексом временного шага
-    //     std::ostringstream filename;
-    //     filename << "../bin/animation/velocity_out_" << std::setfill('0') << std::setw(5) << n << ".bin";
-    //     std::ofstream file_velocity(filename.str(), std::ios::binary);
-    //     // Запись количества точек данных для текущего временного шага (4 байта, little-endian)
-    //     for (int i = 0; i < Mx; ++i) {
-    //         float x_coord = mesh.h * i;
-    //         float pressure_value = mesh.GetValue(i)(1);
-    //         // Запись x, y и p(x, y) (каждый параметр - 4 байта, little-endian)
-    //         file_velocity.write(reinterpret_cast<char*>(&x_coord), sizeof(x_coord));
-    //         file_velocity.write(reinterpret_cast<char*>(&pressure_value), sizeof(pressure_value));
-    //     }
-    //     file_velocity.close();
-    // }
+    file.close();
+
     return 0;
 }

@@ -14,4 +14,6 @@ public:
     Vector2d irrEquation(int i, bool flag);
     void solve(double t);
     void sample();
+    double l_1();
+    double l_inf();
 };
