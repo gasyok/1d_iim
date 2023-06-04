@@ -6,6 +6,7 @@ using namespace Eigen;
 
 class System : public PreProcess {
 public:
+    double l1, lmax;
     double total_time;
     int total_steps;
     System(double _tau, int _M, double _x0, double _A, double _omega);
@@ -14,6 +15,6 @@ public:
     Vector2d irrEquation(int i, bool flag);
     void solve(double t);
     void sample();
-    double l_1();
-    double l_inf();
+    double l_1(double t);
+    double l_inf(double t);
 };

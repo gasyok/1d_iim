@@ -65,7 +65,9 @@ vector<Matrix2d> PreProcess::CalcGammaMatrices(int point, bool flag) {
         F.block<2, 2>(2 * i, 0) = GetFmatrix(i, point, flag).transpose();
     }
     vector<Matrix2d> block_matrices;
-    Matrix<double, 6, 2> G = Q.colPivHouseholderQr().solve(F);
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(Q, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    Eigen::MatrixXd G = svd.solve(F);
+    // Matrix<double, 6, 2> G = Q.colPivHouseholderQr().solve(F);
 
     for (int i = 0; i < 6; i += 2) {
         Matrix2d block = G.block<2, 2>(i, 0);

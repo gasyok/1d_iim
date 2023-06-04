@@ -15,14 +15,6 @@ Vector2d System::equation(int i, bool flag) {
 Vector2d System::irrEquation(int i, bool flag) {
     Vector2d res (0, 0);
     const vector<int> offsets = {i - 1, i, i + 1};
-    // for (int l = 0; l < 3; ++l) {
-    //     int k = l;
-    //     if (flag) {
-    //         k = 2 - l;
-    //     }
-    //     int new_i = offsets[k];
-    //     res += gamma_matrices[i][k] * u[new_i];
-    // }
     for (int l = 0; l < 3; ++l) {
         if (flag) {
             res += gamma_plus[l] * u[offsets[2 - l]];
@@ -35,9 +27,8 @@ Vector2d System::irrEquation(int i, bool flag) {
 }
 void System::solve(double t) {
     vector<Vector2d> new_u = u;
-    // for (int i = 1; i < Mx - 1; ++i) {
-    //     new_u[i] = GetExactSol(i, x0, omega, t);
-    // }
+    new_u[0] = GetExactSol(0, x0, omega, t);
+    new_u[Mx - 1] = GetExactSol(Mx - 1, x0, omega, t);
     for (int i = 1; i < Mx - 1; ++i) {
         if (i == J) {
             new_u[i] = irrEquation(i, false);
@@ -55,25 +46,24 @@ void System::solve(double t) {
     }
     u = new_u;
 }
-double System::l_1() {
+double System::l_1(double t) {
     double res = 0;
     for (int i = J + 1; i < Mx - 1; ++i) {
-        res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega, total_time)(1)) * h;
+        res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega,  t)(1));
     }
-    return res;
+    return res / (Mx - J - 2);
 }
-double System::l_inf() {
-    double res = 0;
+double System::l_inf(double t) {
+    double res = 0.0;
     for (int i = J + 1; i < Mx - 1; ++i) {
-         double t = abs(GetValue(i)(1) - GetExactSol(i, x0, omega, total_time)(1));
-         if (t >= res) res = t;
+         double temp = abs(GetValue(i)(1) - GetExactSol(i, x0, omega, t)(1));
+         if (temp >= res) res = temp;
     }
     return res;
 }
 void System::sample() {
     int n = 0;
     while (n < total_steps) {
-        solve(n * tau);
         // std::ostringstream filename;
         // std::ostringstream exact;
         // filename << "../bin/animation/velocity_out_" << std::setfill('0') << std::setw(5) << n << ".bin";
@@ -96,13 +86,16 @@ void System::sample() {
         // file_velocity.close();
         // file_exact.close();
         n++;
+        solve(n * tau);
     }
+    l1 = l_1(n * tau);
+    lmax = l_inf(n * tau);
     std::cout << "--------Compute ready!----------\n";
 }
 System::System(double _tau, int _M, double _x0, double _A, double _omega)
 : PreProcess(_tau, _M, _x0, _A, _omega) {
     // total_time = (alpha - _x0) / c_minus + 0.5 * (2 - alpha) / c_plus;
-    total_time = (alpha - _x0 - omega) / c_minus + 0.5 * (1 + 0.5 * omega * c_plus / c_minus) / c_plus;
+    total_time = (alpha - _x0) / c_minus + 0.5 / c_plus;
     total_steps = total_time / tau;
     std::cout << "Total Steps: " << total_steps << "\nTotal Time: " << total_time << std::endl;
 }

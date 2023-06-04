@@ -20,9 +20,9 @@ void InitValues::PrintInit() {
 double InitValues::foo(double x, bool flag = false) {
     double _omega = omega;
     if (flag) {
-        _omega = omega * (A * A - A_r * A_r) / (A_t * A_t) * (rho_plus * c_plus * c_plus) / (rho_minus * c_minus * c_minus);
+        _omega = omega * c_plus / c_minus;
     }
-    if (x <= _omega && x >= 0.0) return 0.5 * (1 - cos(2 * M_PI * x / _omega));
+    if (x < _omega && x > 0.0) return pow(sin(2 * M_PI * x / (2 * _omega)), 4);
     return 0.0;
 }
 Vector2d InitValues::GetExactSol(int i, double x0, double omega, double t) {
@@ -30,20 +30,14 @@ Vector2d InitValues::GetExactSol(int i, double x0, double omega, double t) {
     double _pressure = 0.0;
     double omega_t = omega * c_plus / c_minus;
 
-    if (t < (alpha - omega - x0) / c_minus) {
-        _pressure = foo(x - x0 - c_minus * t);
+    if (i <= J) {
+        _pressure = A * foo(x - x0 - c_minus * t);
+        _pressure += A_r * foo(x + x0 + omega - 2 * alpha + c_minus * t);
         return Vector2d(1 / (rho_minus * c_minus) * _pressure, _pressure);
     }
     else {
-        if (i <= J) {
-            _pressure = A * foo(x - x0 - c_minus * t);
-            _pressure += A_r * foo(x + x0 - 2 * alpha + omega + c_minus * t);
-            return Vector2d(1 / (rho_minus * c_minus) * _pressure, _pressure);
-        }
-        else {
-            _pressure = A_t * foo(x - alpha + omega_t + (c_plus / c_minus) * (alpha - omega - x0) - c_plus * t, true);
-            return Vector2d(1 / (rho_plus * c_plus) * _pressure, _pressure);
-        }
+        _pressure = A_t * foo(x - alpha + omega_t + c_plus / c_minus * (alpha - x0 - omega) - c_plus * t, true);
+        return Vector2d(1 / (rho_plus * c_plus) * _pressure, _pressure);
     }
 }
 void InitValues::SetInitRadU(double x0, double omega) {
@@ -64,10 +58,10 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
 : h(2.0 / _M), Mx(_M), x0(_x0), omega(_omega), A(_A) {
 
     rho_minus = 1;
-    c_minus = 1;
+    c_minus = 2;
 
-    rho_plus = 1;
-    c_plus = 1;
+    rho_plus = 0.8;
+    c_plus = 1.5;
     k_minus = c_minus * c_minus * rho_minus;
     k_plus = c_plus * c_plus * rho_plus;
 
@@ -96,5 +90,4 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
     }
 
     SetInitRadU(x0, omega);
-    PrintInit();
 }
