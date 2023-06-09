@@ -81,7 +81,7 @@ void PreProcess::Solve() {
     //     gamma_matrices[i + J] = gammas;
     // }
     gamma_minus = CalcGammaMatrices(J, false);
-    gamma_plus = CalcGammaMatrices(J, true);
+    gamma_plus = CalcGammaMatrices(J + 1, true);
 }
 PreProcess::PreProcess(double _cir_left, int _M, double _x0, double _A, double _omega)
     : InitValues(_cir_left, _M, _x0, _A, _omega) {
