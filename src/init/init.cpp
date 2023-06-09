@@ -22,7 +22,8 @@ double InitValues::foo(double x, bool flag = false) {
     if (flag) {
         _omega = omega * c_plus / c_minus;
     }
-    if (x < _omega && x > 0.0) return pow(sin(2 * M_PI * x / (2 * _omega)), 4);
+    if (x < _omega && x > 0.0) return abs(pow(sin(2 * M_PI * x / (2 * _omega)), 3));
+    // if (x <= _omega && x >= 0.0) return 1.0;
     return 0.0;
 }
 Vector2d InitValues::GetExactSol(int i, double x0, double omega, double t) {
@@ -58,10 +59,10 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
 : h(2.0 / _M), Mx(_M), x0(_x0), omega(_omega), A(_A) {
 
     rho_minus = 1;
-    c_minus = 2;
+    c_minus = 1;
 
-    rho_plus = 0.8;
-    c_plus = 1.5;
+    rho_plus = 2;
+    c_plus = 2;
     k_minus = c_minus * c_minus * rho_minus;
     k_plus = c_plus * c_plus * rho_plus;
 
