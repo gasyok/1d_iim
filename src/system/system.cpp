@@ -14,14 +14,22 @@ Vector2d System::equation(int i, bool flag) {
 }
 Vector2d System::irrEquation(int i, bool flag) {
     Vector2d res (0, 0);
-    const vector<int> offsets = {i - 1, i, i + 1};
-    for (int l = 0; l < 3; ++l) {
+    vector<int> offsets;
+    if (flag) {
+        offsets = {i + 2, i + 1, i, i - 1};
+    }
+    else {
+        offsets = {i - 2, i - 1, i, i + 1};
+    }
+    // const vector<int> offsets = {i - 1, i, i + 1};
+    for (int l = 0; l < 4; ++l) {
         if (flag) {
-            res += gamma_plus[l] * u[offsets[2 - l]];
+            res += gamma_plus[l] * u[offsets[l]];
         }
         else {
             res += gamma_minus[l] * u[offsets[l]];
         }
+        // res += gamma_minus[l] * u[offsets[l]];
     }
     return u[i] + (tau / h) * res; 
 }
