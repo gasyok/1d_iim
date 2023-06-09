@@ -9,7 +9,7 @@ int main() {
     // CIR_left, Mx, x0, A, omega
     // double tau = 0.0004;
     double cir_left = 0.3;
-    int Mx = 300;
+    int Mx = 600;
     double x0 = 0.2;
     double A = 1;
     double omega = 0.3;

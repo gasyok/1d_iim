@@ -6,9 +6,9 @@
 // flag - true -> plus 
 double PreProcess::get_alpha(int i, int j, int point, bool flag) {
     if (!flag) {
-        return pow(((point + j - 1) * h - alpha) / h, i);
+        return pow(((point + j - 2) * h - alpha) / h, i);
     }
-    return pow(((point - (j - 1)) * h - alpha) / h, i);
+    return pow(((point - (j - 2)) * h - alpha) / h, i);
 }
 Matrix2d PreProcess::GetDefaultQ (int l, int point, bool flag) {
     double rho_temp, k_temp, c_temp;
@@ -22,7 +22,7 @@ Matrix2d PreProcess::GetDefaultQ (int l, int point, bool flag) {
         c_temp = 1 / c_temp;
     }
     Vector2d q2_diag (k_temp, 1 / rho_temp);
-    Vector2d q4_diag (k_temp * k_temp / rho_temp, k_temp / rho_temp / rho_temp);
+    Vector2d q4_diag (k_temp * k_temp / rho_temp, k_temp / (rho_temp * rho_temp));
 
     Matrix2d q1 = Matrix2d::Identity();
     Matrix2d q2 = q2_diag.asDiagonal();
@@ -35,7 +35,7 @@ Matrix2d PreProcess::GetDefaultQ (int l, int point, bool flag) {
 Matrix2d PreProcess::GetQmatrix(int i, int l, int point, bool flag) {
     Matrix2d q1 = get_alpha(i, l, point, flag) * Matrix2d::Identity();
     Matrix2d q2 = get_alpha(i, l, point, flag) * Matrix2d::Identity();
-    Matrix2d q3 = get_alpha(i, l, point, flag) * GetDefaultQ(i, point, flag);
+    Matrix2d q3 = get_alpha(i, l, point, flag) * Matrix2d::Identity();
     Matrix2d q4 = get_alpha(i, l, point, flag) * GetDefaultQ(i, point, flag);
 
     vector<Matrix2d> q_s = {q1, q2, q3, q4};
@@ -49,8 +49,9 @@ Matrix2d PreProcess::GetFmatrix(int i, int point, bool flag) {
     }
     Matrix2d f1 = Matrix2d::Zero();
     Matrix2d f2 = -_A;
-    Matrix2d f3 = -2 * get_alpha(1, 1, point, flag) * _A + (tau / h) * _A * _A;
-    Matrix2d f4 = -6 * get_alpha(2, 1, point, flag) * _A + 3 * (tau / h) * get_alpha(1, 1, point, flag) * _A * _A - (tau / h) * (tau / h) * _A * _A * _A;
+    Matrix2d f3 = -2 * get_alpha(1, 2, point, flag) * _A + (tau / h) * _A * _A;
+    Matrix2d f4 = -6 * get_alpha(2, 2, point, flag) * _A + 3 * (tau / h) * get_alpha(1, 2, point, flag) * _A * _A - (tau / h) * (tau / h) * _A * _A * _A;
+    // Matrix2d f5 = -4 * get_alpha(3, 1, point, flag) * _A + 3 * (tau / h) * get_alpha(1, 1, point, flag) * _A * _A - (tau / h) * (tau / h) * _A * _A * _A;
 
     vector<Matrix2d> matrices = {f1, f2, f3, f4};
     return matrices[i];
@@ -86,19 +87,19 @@ void PreProcess::Solve() {
     //     gamma_matrices[i + J] = gammas;
     // }
     gamma_minus = CalcGammaMatrices(J, false);
-    gamma_plus = CalcGammaMatrices(J, true);
+    gamma_plus = CalcGammaMatrices(J + 1, true);
 }
 PreProcess::PreProcess(double _cir_left, int _M, double _x0, double _A, double _omega)
     : InitValues(_cir_left, _M, _x0, _A, _omega) {
     Solve();
-
-    std::cout << "Gamma Minus:\n";
-    for (auto c : gamma_minus) {
-        std::cout << c << "\n\n";
-    }
-
-    std::cout << "Gamma Plus:\n";
-    for (auto c : gamma_plus) {
-        std::cout << c << "\n\n";
-    }
+    //
+    // std::cout << "Gamma Minus:\n";
+    // for (auto c : gamma_minus) {
+    //     std::cout << c << "\n\n";
+    // }
+    //
+    // std::cout << "Gamma Plus:\n";
+    // for (auto c : gamma_plus) {
+    //     std::cout << c << "\n\n";
+    // }
 }
