@@ -61,8 +61,8 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
     rho_minus = 1;
     c_minus = 1;
 
-    rho_plus = 2;
-    c_plus = 2;
+    rho_plus = 1;
+    c_plus = 1;
     k_minus = c_minus * c_minus * rho_minus;
     k_plus = c_plus * c_plus * rho_plus;
 

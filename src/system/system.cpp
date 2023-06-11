@@ -4,19 +4,19 @@
 Vector2d System::GetValue(int i) {
     return u[i];
 }
-Vector2d System::equation(int i, bool flag) {
+Vector2d System::equation(int i) {
     Matrix2d _A = A_minus;
 
-    if (flag) {
+    if (i > J) {
         _A = A_plus;
     }
     return u[i] - 0.5 * (tau / h) * _A * (u[i + 1] - u[i - 1]) + 0.5 * (tau / h) * (tau / h) * _A * _A * (u[i + 1] - 2 * u[i] + u[i - 1]);
 }
-Vector2d System::irrEquation(int i, bool flag) {
+Vector2d System::irrEquation(int i) {
     Vector2d res (0, 0);
     const vector<int> offsets = {i - 1, i, i + 1};
     for (int l = 0; l < 3; ++l) {
-        if (flag) {
+        if (i > J) {
             res += gamma_plus[l] * u[offsets[2 - l]];
         }
         else {
@@ -30,28 +30,25 @@ void System::solve(double t) {
     new_u[0] = GetExactSol(0, x0, omega, t);
     new_u[Mx - 1] = GetExactSol(Mx - 1, x0, omega, t);
     for (int i = 1; i < Mx - 1; ++i) {
-        if (i == J) {
-            new_u[i] = irrEquation(i, false);
-            new_u[i + 1] = irrEquation(i + 1, true);
-            i = i + 1;
-        }
-        else {
-            if (i > J + 1) {
-                new_u[i] = equation(i, true);
-            }
-            else {
-                new_u[i] = equation(i, false);
-            }
-        }
+        // if (i == J) {
+        //     new_u[i] = irrEquation(i);
+        //     new_u[i + 1] = irrEquation(i + 1);
+        //     i = i + 1;
+        // }
+        // else {
+        //     if (i > J + 1) {
+        //         new_u[i] = equation(i);
+        //     }
+        //     else {
+        //         new_u[i] = equation(i);
+        //     }
+        // }
+        new_u[i] = equation(i);
     }
     u = new_u;
 }
 double System::l_1(double t) {
     double res = 0;
-    // for (int i = J + 1; i < Mx - 1; ++i) {
-    //     res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega,  t)(1));
-    // }
-    // return res / (Mx - J - 2);
     for (int i = 0; i < Mx; ++i) {
         res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega,  t)(1)) * h;
     }

@@ -9,14 +9,12 @@ int main() {
     // CIR_left, Mx, x0, A, omega
     // double tau = 0.0004;
     double cir_left = 0.3;
-    int Mx = 400;
+    int Mx = 100;
     double x0 = 0.2;
     double A = 1;
     double omega = 0.3;
     // System mesh(cir_left, Mx, x0, A, omega);
     // mesh.sample();
-    // std::cout << "L1: " << mesh.l1 << std::endl;
-    // std::cout << "Lmax: " << mesh.lmax << std::endl;
     ofstream file;
     file.open("../bin/result.data");
     double prev_l1 = 0, prev_linf = 0, l1 = 0, linf = 0;

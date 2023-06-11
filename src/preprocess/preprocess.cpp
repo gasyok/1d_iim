@@ -86,14 +86,4 @@ void PreProcess::Solve() {
 PreProcess::PreProcess(double _cir_left, int _M, double _x0, double _A, double _omega)
     : InitValues(_cir_left, _M, _x0, _A, _omega) {
     Solve();
-
-    std::cout << "Gamma Minus:\n";
-    for (auto c : gamma_minus) {
-        std::cout << c << "\n\n";
-    }
-
-    std::cout << "Gamma Plus:\n";
-    for (auto c : gamma_plus) {
-        std::cout << c << "\n\n";
-    }
 }
