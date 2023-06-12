@@ -32,26 +32,26 @@ void System::solve(double t) {
     new_u[Mx - 1] = GetExactSol(Mx - 1, x0, omega, t);
 
     for (int i = 2; i < Mx - 1; ++i) {
-        if (i >= J && i <= J + 2) {
-            new_u[i] = irrEquation(i);
-        }
-        else {
-            new_u[i] = equation(i);
-        }
-        // new_u[i] = equation(i);
+        // if (i >= J && i <= J + 2) {
+        //     new_u[i] = irrEquation(i);
+        // }
+        // else {
+        //     new_u[i] = equation(i);
+        // }
+        new_u[i] = equation(i);
     }
     u = new_u;
 }
 double System::l_1(double t) {
     double res = 0;
-    for (int i = J + 1; i < Mx - 1; ++i) {
-        res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega,  t)(1));
+    for (int i = 0; i < Mx; ++i) {
+        res += abs(GetValue(i)(1) - GetExactSol(i, x0, omega,  t)(1)) * h;
     }
-    return res / (Mx - J - 2);
+    return res;
 }
 double System::l_inf(double t) {
     double res = 0.0;
-    for (int i = J + 1; i < Mx - 1; ++i) {
+    for (int i = 0; i < Mx; ++i) {
         double temp = abs(GetValue(i)(1) - GetExactSol(i, x0, omega, t)(1));
         if (temp >= res) res = temp;
     }
