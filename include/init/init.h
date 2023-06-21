@@ -10,9 +10,10 @@ using std::vector;
 class InitValues {
 private:
     // vector<double> coord_x, coord_y, velocity_x, velocity_y;
-    double z_l, z_r, A_r, A_t;
 public:
+    double z_l, z_r, A_r, A_t;
     double A, omega, x0, y0;
+    double stability;
     vector<Vector2d> u;
     double foo(double x, bool flag);
     Matrix2d A_minus, A_plus;

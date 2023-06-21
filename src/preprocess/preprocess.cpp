@@ -26,8 +26,9 @@ Matrix2d PreProcess::GetDefaultQ (int l, int point) {
     Matrix2d q2 = q2_diag.asDiagonal();
     Matrix2d q3 = c_temp * c_temp * Matrix2d::Identity();
     Matrix2d q4 = q4_diag.asDiagonal();
+    Matrix2d q5 = c_temp * c_temp * c_temp * c_temp * Matrix2d::Identity();
 
-    vector<Matrix2d> result {q1, q2, q3, q4};
+    vector<Matrix2d> result {q1, q2, q3, q4, q5};
     return result[l];
 }
 Matrix2d PreProcess::GetQmatrix(int i, int l, int point) {
@@ -47,30 +48,31 @@ Matrix2d PreProcess::GetFmatrix(int i, int point) {
     Matrix2d f2 = -_A;
     Matrix2d f3 = -2 * get_alpha(1, 2, point) * _A + (tau / h) * _A * _A;
     Matrix2d f4 = -3 * get_alpha(2, 2, point) * _A + 3 * (tau / h) * get_alpha(1, 2, point) * _A * _A - (tau / h) * (tau / h) * _A * _A * _A;
+    Matrix2d f5 = -4 * get_alpha(3, 2, point) * _A + 6 * (tau / h) * get_alpha(2, 2, point) * _A * _A - 4 * (tau / h) * (tau / h) * _A * _A * _A * get_alpha(1, 2, point) + (tau / h) * (tau / h) * (tau / h) * _A * _A * _A * _A;
 
-    vector<Matrix2d> matrices = {f1, f2, f3, f4};
+    vector<Matrix2d> matrices = {f1, f2, f3, f4, f5};
     return matrices[i];
 }
 vector<Matrix2d> PreProcess::CalcGammaMatrices(int point) {
-    Matrix<double, 8, 8> Q;
-    Eigen::Matrix<double, 8, 2> F;
+    Matrix<double, 10, 10> Q;
+    Eigen::Matrix<double, 10, 2> F;
     Q.setZero();
     F.setZero();
 
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
             Q.block<2, 2>(2 * i, 2 * j) = GetQmatrix(i, j, point).transpose();
         }
     }
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 5; ++i) {
         F.block<2, 2>(2 * i, 0) = GetFmatrix(i, point).transpose();
     }
     vector<Matrix2d> block_matrices;
     // Eigen::JacobiSVD<Eigen::MatrixXd> svd(Q, Eigen::ComputeThinU | Eigen::ComputeThinV);
     // Eigen::MatrixXd G = svd.solve(F);
-    Matrix<double, 8, 2> G = Q.colPivHouseholderQr().solve(F);
+    Matrix<double, 10, 2> G = Q.colPivHouseholderQr().solve(F);
 
-    for (int i = 0; i < 8; i += 2) {
+    for (int i = 0; i < 10; i += 2) {
         Matrix2d block = G.block<2, 2>(i, 0);
         block_matrices.push_back(block.transpose());
     }
@@ -78,7 +80,7 @@ vector<Matrix2d> PreProcess::CalcGammaMatrices(int point) {
     return block_matrices;
 }
 void PreProcess::Solve() {
-    for (int i = J; i <= J + 2; ++i) {
+    for (int i = J-1; i <= J + 2; ++i) {
         vector<Matrix2d> gammas = CalcGammaMatrices(i);
         gamma_matrices[i] = gammas;
     }

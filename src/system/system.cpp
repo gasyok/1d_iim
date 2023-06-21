@@ -4,23 +4,59 @@
 Vector2d System::GetValue(int i) {
     return u[i];
 }
-Vector2d System::du(int m) {
-    return u[m - 1] - u[m];
+double System::du2(int m) {
+    return tmp_2(m - 1) - tmp_2(m);
+}
+double System::du1(int m) {
+    return tmp_1(m + 1) - tmp_1(m);
+}
+
+double System::tmp_1(int i) {
+    double _z = z_l;
+    if (i > J) {
+        _z = z_r;
+    }
+    return 0.5 * (u[i](1) - _z * u[i](0));
+}
+double System::tmp_2(int i) {
+    double _z = z_l;
+    if (i > J) {
+        _z = z_r;
+    }
+    return 0.5 * (u[i](1) + _z * u[i](0));
+}
+double System::equation_1(int i) {
+    double _lambda = c_minus * tau / h;
+    if (i > J) {
+        _lambda = c_plus * tau / h;
+    }
+    return tmp_1(i) + 0.5 * _lambda * (du1(i) + du1(i - 1)) + 0.5 * _lambda * _lambda * (du1(i) - du1(i - 1)) + (1. / 6) * _lambda * (_lambda * _lambda - 1) * (du1(i + 1) - 2 * du1(i) + du1(i - 1));
+}
+double System::equation_2(int i) {
+    double _lambda = c_minus * tau / h;
+    if (i > J) {
+        _lambda = c_plus * tau / h;
+    }
+    return tmp_2(i) + 0.5 * _lambda * (du2(i) + du2(i + 1)) + 0.5 * _lambda * _lambda * (du2(i) - du2(i + 1)) +  (1. / 6) * _lambda * (_lambda * _lambda - 1) * (du2(i + 1) - 2 * du2(i) + du2(i - 1));
 }
 Vector2d System::equation(int i) {
-    Matrix2d _A = A_minus;
-
+    // Matrix2d _A = A_minus;
+    Matrix2d R;
+    double _z = z_l;
     if (i > J) {
-        _A = A_plus;
+        // _A = A_plus;
+        _z = z_r;
     }
-    // return u[i] - 0.5 * (tau / h) * _A * (u[i + 1] - u[i - 1]) + 0.5 * (tau / h) * (tau / h) * _A * _A * (u[i + 1] - 2 * u[i] + u[i - 1]);
-    return u[i] + 0.5 * (tau / h) * _A * (du(i) + du(i + 1)) + 0.5 * (tau / h) * (tau / h) * _A * _A * (du(i) - du(i + 1)) + (tau / h) / 6 * ((tau / h) * (tau / h) * _A * _A - Matrix2d::Identity()) * (du(i - 1) - 2 * du(i) + du(i + 1));
+
+    R << -1. / _z, 1 / _z,
+        1, 1;
+
+    return R * Vector2d(equation_1(i), equation_2(i));
 }
 Vector2d System::irrEquation(int i) {
     Vector2d res (0, 0);
-    for (int l = 0; l < 4; ++l) {
+    for (int l = 0; l <= 4; ++l) {
         res += gamma_matrices[i][l] * u[i - 2 + l];
-
     }
     return u[i] + (tau / h) * res; 
 }
@@ -30,15 +66,16 @@ void System::solve(double t) {
     new_u[0] = GetExactSol(0, x0, omega, t);
     new_u[1] = GetExactSol(1, x0, omega, t);
     new_u[Mx - 1] = GetExactSol(Mx - 1, x0, omega, t);
+    new_u[Mx - 2] = GetExactSol(Mx - 2, x0, omega, t);
 
-    for (int i = 2; i < Mx - 1; ++i) {
-        // if (i >= J && i <= J + 2) {
-        //     new_u[i] = irrEquation(i);
-        // }
-        // else {
-        //     new_u[i] = equation(i);
-        // }
-        new_u[i] = equation(i);
+    for (int i = 2; i < Mx - 2; ++i) {
+        if (i >= J - 1 && i <= J + 2) {
+            new_u[i] = irrEquation(i);
+        }
+        else {
+            new_u[i] = equation(i);
+        }
+        // new_u[i] = equation(i);
     }
     u = new_u;
 }

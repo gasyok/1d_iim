@@ -61,8 +61,8 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
     rho_minus = 1;
     c_minus = 1;
 
-    rho_plus = 1;
-    c_plus = 1;
+    rho_plus = 2;
+    c_plus = 2;
     k_minus = c_minus * c_minus * rho_minus;
     k_plus = c_plus * c_plus * rho_plus;
 
@@ -71,12 +71,32 @@ InitValues::InitValues(double cir_left, int _M, double _x0, double _A, double _o
     A_t = A * 2 * z_r / (z_l + z_r);
     A_r = A * (z_r - z_l) / (z_l + z_r);
     tau = h * cir_left / c_minus;
+    // z_minus = sqrt(z_l);
+    // z_plus = sqrt(z_r);
 
     std::cout << "A_t = " << A_t << std::endl;
     std::cout << "A_r = " << A_r << std::endl;
     std::cout << "TAU: " << tau << std::endl;
     std::cout << "CIR LEFT: " << c_minus * tau / h << std::endl;
     std::cout << "CIR RIGHT: " << c_plus * tau / h << std::endl;
+
+    double cir_right = c_plus * tau / h;
+
+    double left_stab = 4 * cir_left * cir_left - pow(cir_left, 4);
+    double right_stab = 4 * cir_right * cir_right - pow(cir_right, 4);
+
+    if (left_stab >= right_stab) {
+        stability = left_stab + (3 - left_stab) * 0.5;
+    }
+    else {
+        stability = right_stab + (3 - right_stab) * 0.5;
+    }
+
+    stability = left_stab + 0.2;
+
+    std::cout << "LEFT STAB: " << left_stab << std::endl;
+    std::cout << "RIGHT STAB: " << right_stab << std::endl;
+    std::cout << "stability: " << stability << std::endl;
 
     A_minus << 0, 1 / rho_minus,
         k_minus, 0;
